@@ -472,7 +472,7 @@ M30
     const removed = cutDepth ? cutDepth.reduce((sum, depth) => sum + depth, 0) * resolution * resolution / 1000 : 0;
     const mrr = cuttingSeconds > 0 ? removed / (cuttingSeconds / 60) : 0;
     const phase = fatal ? 'error' : paused ? 'paused' : executed >= parsedBlocks.length && parsedBlocks.length ? 'complete' : executed > 0 || timer ? 'running' : 'ready';
-    window.dispatchEvent(new CustomEvent('mct:nc-link', { detail: {
+    const linkDetail = {
       phase,
       lineNo: source?.lineNo || 0,
       code: source?.source || '',
@@ -490,7 +490,9 @@ M30
       cuttingSeconds,
       workSystem: source?.workSystem || 54,
       warnings: [...warnings]
-    } }));
+    };
+    window.__mctNcLinkState = linkDetail;
+    window.dispatchEvent(new CustomEvent('mct:nc-link', { detail: linkDetail }));
   }
   function refresh() {
     const count = parsedBlocks.length, block = executed ? parsedBlocks[executed - 1] : null;
@@ -537,7 +539,7 @@ M30
     $('runProgram').innerHTML = '<span>Ⅱ</span> 일시 정지';
     timer = setInterval(runBlock, 130);
   });
-  $('gcodeInput').addEventListener('input', () => { stop(); parsedBlocks = []; executed = 0; warnings = []; fatal = ''; paused = false; resetStock(); $('canvasEmpty').classList.remove('hidden'); $('lineCount').textContent = 'EDITING'; $('programStatus').textContent = '코드 변경됨 · 분석을 다시 실행하세요.'; render(); window.dispatchEvent(new CustomEvent('mct:nc-link', { detail: { phase: 'edited' } })); });
+  $('gcodeInput').addEventListener('input', () => { stop(); parsedBlocks = []; executed = 0; warnings = []; fatal = ''; paused = false; resetStock(); $('canvasEmpty').classList.remove('hidden'); $('lineCount').textContent = 'EDITING'; $('programStatus').textContent = '코드 변경됨 · 분석을 다시 실행하세요.'; render(); const editedState = { phase: 'edited' }; window.__mctNcLinkState = editedState; window.dispatchEvent(new CustomEvent('mct:nc-link', { detail: editedState })); });
   ['stockX', 'stockY', 'stockZ', 'toolDiameter', 'toolTeeth', 'fluteLength', 'holderDiameter', 'toolOverhang', 'toolHNumber', 'toolLengthOffset', 'originX', 'originY', 'originZ', 'travelX', 'travelY', 'travelZ', 'maxRpm', 'maxRapid', 'viseJawWidth', 'viseOffset', 'viseHeight', 'viseEmbed', 'useFixture'].forEach(id => $(id).addEventListener('input', () => { if (parsedBlocks.length) analyze(); else render(); }));
   $('dialect').addEventListener('change', selectProfile);
   window.addEventListener('resize', render);

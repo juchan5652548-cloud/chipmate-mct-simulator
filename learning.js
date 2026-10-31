@@ -118,4 +118,7 @@
   $('gcodeInput').addEventListener('input', () => { nc = null; summary(); });
   window.addEventListener('mct:nc-link', (e) => { const d = e.detail || {}; nc = ['edited', 'manual'].includes(d.phase) ? null : d; summary(); if ($('codeLessonResult').querySelector('.decoded-list')) decode(); });
   showCase(); setupFeedback();
+  // nc-sim.js analyzes the example before this deferred script is loaded.
+  // Re-run analysis once so the learning modules receive the current mct:nc-link state.
+  if ($('lineCount')?.textContent && $('lineCount').textContent !== '0 BLOCKS' && $('gcodeInput')?.value.trim()) $('parseProgram').click();
 })();

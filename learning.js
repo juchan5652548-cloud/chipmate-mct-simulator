@@ -121,3 +121,5 @@
   const initialNcState = window.__mctNcLinkState;
   if (initialNcState && !['edited', 'manual'].includes(initialNcState.phase)) { nc = initialNcState; summary(); }
 })();
+
+if (window.__mctNcLinkState && !['edited', 'manual'].includes(window.__mctNcLinkState.phase)) window.dispatchEvent(new CustomEvent('mct:nc-link', { detail: window.__mctNcLinkState }));

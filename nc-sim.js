@@ -298,7 +298,7 @@ M30
           const cx=(ix+.5)*pitch,cy=(iy+.5)*pitch;
           if ((cx-p.x)**2+(cy-p.y)**2 <= rad**2 && cutDepth[iy*nx+ix] < -p.z-.1) { hit=true; break; }
         }
-        if (hit) { alarms.add(`N${seg.lineNo}: 급속 이동 중 남은 소재와 공구가 간섭할 수 있습니다.`); seg.alarm = true; }
+        if (hit) { alarms.add(`N${seg.lineNo}: 간이 높이맵에서 급속 이동 중 남은 소재와 접촉할 위험 후보`); seg.alarm = true; }
       }
       // Check flute-end / holder envelope against the remaining height-field stock.
       if (cutDepth && p.x >= 0 && p.x <= s.x && p.y >= 0 && p.y <= s.y) {
@@ -317,7 +317,7 @@ M30
             const surface = -cutDepth[iy*nx+ix];
             if (surface > ring.z0 + .25 && -s.z < ring.z1) { hit = true; break; }
           }
-          if (hit) { alarms.add(`N${seg.lineNo}: 남은 소재와 ${ring.label} 간섭 가능성`); seg.alarm = true; }
+          if (hit) { alarms.add(`N${seg.lineNo}: 간이 형상에서 남은 소재와 ${ring.label} 접촉 위험 후보`); seg.alarm = true; }
         }
       }
       if (fixtureEnabled()) {
@@ -327,7 +327,7 @@ M30
           const overlapsTool = nx * nx + ny * ny <= (t.diameter / 2) ** 2 && p.z < box.z1 && fluteTop > box.z0;
           const holderBottom = p.z + t.overhang;
           const overlapsHolder = nx * nx + ny * ny <= (t.holder / 2) ** 2 && holderBottom < box.z1 && holderBottom + 60 > box.z0;
-          if (overlapsTool || overlapsHolder) { alarms.add(`N${seg.lineNo}: ${index ? '후면' : '전면'} 바이스와 공구/홀더 간섭 가능성`); seg.alarm = true; }
+          if (overlapsTool || overlapsHolder) { alarms.add(`N${seg.lineNo}: 간이 모델의 ${index ? '후면' : '전면'} 바이스와 공구/홀더 접촉 위험 후보`); seg.alarm = true; }
         });
       }
     }
@@ -509,8 +509,9 @@ M30
     $('timeReadout').textContent = `${elapsedSeconds.toFixed(1)} s`;
     const msg = $('ncMessages'); msg.className = 'nc-messages';
     if (fatal) { msg.textContent = fatal; msg.classList.add('error'); }
-    else if (warnings.length) { msg.textContent = `검토 경고 ${warnings.length}건: ${warnings.slice(-3).join(' · ')}`; msg.classList.add(warnings.some(w => /간섭|범위 밖|주축/.test(w)) ? 'error' : 'warning'); }
-    else msg.textContent = executed ? '현재까지의 블록에서 등록된 충돌·해석 경고가 없습니다.' : '코드 분석 후 전체 재생 또는 한 블록씩 실행하세요.';
+    else if (warnings.length) { msg.textContent = `간이 모델 위험 후보/검토 항목 ${warnings.length}건: ${warnings.slice(-3).join(' · ')} · 실제 기계 안전 판정은 아닙니다.`; msg.classList.add('warning'); }
+    else if (executed >= parsedBlocks.length && parsedBlocks.length) { msg.textContent = '완료: 간이 모델에서 등록된 위험 후보가 없습니다. 실제 기계 안전 검증은 별도입니다.'; msg.classList.add('success'); }
+    else msg.textContent = executed ? '현재까지 간이 모델에서 등록된 위험 후보가 없습니다. 실제 기계 안전 검증은 별도입니다.' : '예제 프로그램이 준비되었습니다. 코드 분석 후 한 블록씩 실행해 보세요.';
     render();
     publishLinkState(block);
   }
@@ -539,6 +540,12 @@ M30
     $('runProgram').innerHTML = '<span>Ⅱ</span> 일시 정지';
     timer = setInterval(runBlock, 130);
   });
+  $('sideLoadSample')?.addEventListener('click', () => { $('ncSimulator').scrollIntoView({ behavior: 'smooth' }); $('loadSample').click(); });
+  $('sideAnalyze')?.addEventListener('click', () => { $('ncSimulator').scrollIntoView({ behavior: 'smooth' }); $('parseProgram').click(); });
+  $('sideRun')?.addEventListener('click', () => { $('ncSimulator').scrollIntoView({ behavior: 'smooth' }); $('runProgram').click(); });
+  document.querySelectorAll('.side-nav .nav-item').forEach(link => link.addEventListener('click', () => {
+    document.querySelectorAll('.side-nav .nav-item').forEach(item => item.classList.toggle('active', item === link));
+  }));
   $('gcodeInput').addEventListener('input', () => { stop(); parsedBlocks = []; executed = 0; warnings = []; fatal = ''; paused = false; resetStock(); $('canvasEmpty').classList.remove('hidden'); $('lineCount').textContent = 'EDITING'; $('programStatus').textContent = '코드 변경됨 · 분석을 다시 실행하세요.'; render(); const editedState = { phase: 'edited' }; window.__mctNcLinkState = editedState; window.dispatchEvent(new CustomEvent('mct:nc-link', { detail: editedState })); });
   ['stockX', 'stockY', 'stockZ', 'toolDiameter', 'toolTeeth', 'fluteLength', 'holderDiameter', 'toolOverhang', 'toolHNumber', 'toolLengthOffset', 'originX', 'originY', 'originZ', 'travelX', 'travelY', 'travelZ', 'maxRpm', 'maxRapid', 'viseJawWidth', 'viseOffset', 'viseHeight', 'viseEmbed', 'useFixture'].forEach(id => $(id).addEventListener('input', () => { if (parsedBlocks.length) analyze(); else render(); }));
   $('dialect').addEventListener('change', selectProfile);

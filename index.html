@@ -24,22 +24,34 @@
       <nav class="side-nav" aria-label="주 메뉴">
         <a class="nav-item active" href="#ncSimulator"><span class="nav-icon">⌘</span>NC 가공 검증<span class="nav-arrow">↗</span></a>
         <a class="nav-item" href="#lab"><span class="nav-icon">◉</span>가공조건 학습</a>
-        <a class="nav-item" href="#lesson"><span class="nav-icon">▤</span>학습 노트</a>
+        <a class="nav-item" href="#learningModules"><span class="nav-icon">▤</span>NC 코드 학습</a>
         <a class="nav-item" href="#challenge"><span class="nav-icon">◇</span>도전 과제<span class="nav-count">03</span></a>
         <a class="nav-item" href="#learningModules"><span class="nav-icon">＋</span>실습 모듈</a>
       </nav>
       <div class="sidebar-bottom">
-        <div class="progress-card"><div class="progress-top"><span>이번 학습 진도</span><b>2 / 6</b></div><div class="progress-track"><i></i></div><small>기초 가공조건 이해하기</small></div>
-        <div class="profile"><div class="avatar">민</div><div><b>학습자</b><small>MCT 입문 과정</small></div><span class="more">•••</span></div>
+        <div class="progress-card"><div class="progress-top"><span>실습 모듈 완료</span><b id="sideProgressCount">0 / 5</b></div><div class="progress-track"><i id="sideProgressBar"></i></div><small>학습 활동은 이 브라우저에 저장됩니다.</small></div>
+        <div class="sidebar-quick-actions" aria-label="NC 빠른 실행">
+          <button type="button" id="sideLoadSample"><span>↧</span> 예제 불러오기</button>
+          <button type="button" id="sideAnalyze"><span>⌕</span> 코드 분석</button>
+          <button type="button" id="sideRun"><span>▶</span> NC 시뮬레이션</button>
+        </div>
       </div>
     </aside>
 
     <main class="main-content" id="lab">
-      <header class="topbar"><div class="breadcrumbs">NC 가공 시뮬레이터 <span>/</span> <b>프로그램 검증</b></div><div class="top-actions"><span class="status-dot"></span><span>로컬 해석기</span><button class="icon-button" aria-label="도움말">?</button></div></header>
-      <section class="page-heading"><div><div class="eyebrow"><span class="eyebrow-dot"></span>INTERACTIVE LEARNING LAB</div><h1>NC 가공 시뮬레이터</h1><p>G코드를 해석하고, 소재 제거와 충돌 위험을 블록 단위로 검증합니다.</p></div><button class="lesson-button" id="lessonButton"><span>▣</span> 오늘의 학습 목표 <b>↗</b></button></section>
+      <header class="topbar"><div class="breadcrumbs">NC 가공 시뮬레이터 <span>/</span> <b>프로그램 검증</b></div><div class="top-actions"><span class="status-dot"></span><span>범용 3축 · 로컬 해석기</span><button class="icon-button" aria-label="도움말">?</button></div></header>
+      <section class="page-heading"><div><div class="eyebrow"><span class="eyebrow-dot"></span>INTERACTIVE LEARNING LAB</div><h1>NC 가공 시뮬레이터</h1><p>제어기와 셋업을 정하고 NC 코드를 분석·실행해 공구 경로와 결과를 확인하세요.</p></div><button class="lesson-button" id="lessonButton"><span>▣</span> 오늘의 학습 목표 <b>↗</b></button></section>
+
+      <nav class="workflow-guide" aria-label="시뮬레이터 사용 순서">
+        <a href="#dialect"><b>01</b><span>제어기 프로파일</span></a><i>→</i>
+        <a href="#stockX"><b>02</b><span>소재·공구·치구 설정</span></a><i>→</i>
+        <a href="#gcodeInput"><b>03</b><span>NC 코드 분석</span></a><i>→</i>
+        <a href="#stepProgram"><b>04</b><span>블록 실행</span></a><i>→</i>
+        <a href="#toolpathCanvas"><b>05</b><span>경로·가공 결과 확인</span></a>
+      </nav>
 
       <section class="nc-simulator" id="ncSimulator">
-        <div class="nc-title-row"><div><div class="eyebrow"><span class="eyebrow-dot"></span>NC PROGRAM SIMULATION</div><h2>NC 코드 가공 시뮬레이터</h2><p>NC 프로그램을 해석하고, 공구 이동에 따른 소재 형상과 간섭 경고를 확인합니다.</p></div><div class="nc-mode"><i></i> 범용 3축 밀링 프로파일</div></div>
+        <div class="nc-title-row"><div><div class="eyebrow"><span class="eyebrow-dot"></span>NC PROGRAM SIMULATION</div><h2>NC 코드 가공 시뮬레이터</h2><p>NC 프로그램을 해석하고, 공구 이동에 따른 소재 형상과 간이 모델의 위험 후보를 확인합니다.</p></div><div class="nc-mode"><i></i> 범용 3축 밀링 프로파일</div></div>
         <div class="machine-setup">
           <div class="setup-cell dialect-cell"><label for="dialect">제어기 프로파일</label><select id="dialect"><option value="generic">ISO 밀링 공통 코드</option><option value="fanuc">FANUC 0i 계열</option><option value="haas">Haas NGC</option><option value="linuxcnc">LinuxCNC RS274/NGC</option></select></div>
           <div class="setup-cell"><label for="stockX">소재 X (mm)</label><input id="stockX" type="number" min="10" max="1000" value="60"></div>
@@ -75,14 +87,14 @@
             <div class="nc-controls"><button id="parseProgram" class="nc-secondary">코드 분석</button><button id="stepProgram" class="nc-secondary">한 블록 실행 <b>→</b></button><button id="runProgram" class="nc-run"><span>▶</span> 전체 실행</button><button id="resetProgram" class="nc-reset" title="처음부터">↺</button></div>
           </div>
           <div class="nc-view-card">
-            <div class="nc-card-head"><div><b>입체 소재 제거 · 공구 경로</b><small>초록: 절삭 경로　주황 점선: 급속 이동　빨강: 간섭</small></div><span id="blockIndicator" class="block-indicator">BLOCK 0 / 0</span></div>
+            <div class="nc-card-head"><div><b>입체 소재 제거 · 공구 경로</b><small>초록: 절삭 경로　주황 점선: 급속 이동　빨강: 위험 후보 위치</small></div><span id="blockIndicator" class="block-indicator">BLOCK 0 / 0</span></div>
             <div class="nc-canvas-wrap"><canvas id="toolpathCanvas" aria-label="G코드 공구 경로 및 입체 소재 제거 시뮬레이션"></canvas><div id="canvasEmpty" class="canvas-empty"><span>⌖</span><b>코드를 분석하면 입체 소재 모델과 공구 경로가 표시됩니다</b><small>G0/G1/G2/G3 · G81/G82/G83 · M3/M4/M5 · M6 · M7/M8/M9</small></div></div>
             <div class="nc-readout"><div><span>현재 위치 · G54</span><b id="positionReadout">X 0.000　Y 0.000　Z 0.000</b></div><div><span>주축 / 이송</span><b id="spindleReadout">OFF · F0</b></div><div><span>현재 공구</span><b id="toolReadout">T1 · Ø10</b></div><div><span>제거 체적</span><b id="volumeReadout">0.000 cm³</b></div><div><span>누적 예상 시간</span><b id="timeReadout">0.0 s</b></div></div>
             <div class="active-nc"><span>현재 실행 블록</span><code id="activeCode">대기 중</code></div>
             <div id="ncMessages" class="nc-messages" aria-live="polite">예제 코드에는 G0, G1 직선 이동이 포함되어 있습니다.</div>
           </div>
         </div>
-        <div class="nc-disclaimer"><b>현재 검증 모델</b><span>0.5 mm XY 해상도의 2.5D 평엔드밀 높이맵 시뮬레이션입니다. 화면의 바이스와 축 범위는 사용자가 설정한 간이 모델이며, 제어기/기계 전용 포스트 검증이나 실제 기계 안전 검증을 대체하지 않습니다.</span></div>
+        <div class="nc-disclaimer"><b>검증 범위 안내</b><div><p><strong>위험 후보:</strong> 아래 경고는 입력한 축 범위·공구/홀더·간이 바이스·높이맵에서 발견한 후보입니다. 실제 충돌 확정 판정이 아닙니다.</p><p><strong>검증 제외:</strong> 기계별 운동학·CAD, 포스트/제어기 전용 옵션, 실제 툴 테이블과 워크 오프셋은 검증하지 않습니다. 현장 안전 검증을 대체하지 않습니다.</p><small>현재 소재 모델: 0.5 mm XY 해상도의 2.5D 평엔드밀 높이맵</small></div></div>
       </section>
       <div class="experiment-layout">
         <section class="left-column">
@@ -127,17 +139,18 @@
         </section>
 
         <aside class="right-column">
-          <article class="coach-card"><div class="coach-top"><div class="coach-avatar"><span>✳</span></div><div><div class="coach-name">칩메이트 코치 <span class="ai-pill">AI COACH</span></div><small>조건을 분석하고 있어요</small></div><button class="coach-menu" aria-label="코치 메뉴">•••</button></div>
+          <article class="coach-card"><div class="coach-top"><div class="coach-avatar"><span>✳</span></div><div><div class="coach-name">칩메이트 학습 코치 <span class="ai-pill">규칙형</span></div><small>조건을 분석하고 있어요</small></div><button class="coach-menu" aria-label="코치 메뉴">•••</button></div>
             <div class="coach-message" id="coachMessage"><div class="message-label">현재 조건 분석</div><p>알루미늄 6061에 적합한 조건으로 시작했어요. <b>날당 이송량</b>을 높이면 이송속도와 재료 제거율이 함께 증가합니다. 먼저 조건을 바꿔 결과를 비교해 볼까요?</p></div>
             <div class="coach-tip"><span>✦</span><div><b>생각해 보기</b><p>이송량을 2배로 높이면, 주축 회전수도 함께 바뀔까요?</p></div></div>
             <div class="coach-actions"><button id="hintButton">힌트 받기 <span>↗</span></button><button id="explainButton">공식 설명 <span>↗</span></button><button id="recommendButton">조건 추천 <span>✦</span></button></div>
+            <div class="ai-disclosure"><b>AI 활용 방식 · 로컬 규칙형 학습 코치</b><p>현재 생성형 AI API는 연결하지 않았습니다. 입력한 NC·가공조건에 계산식과 규칙을 적용해 오류 원인 설명, 단계별 힌트, 조건 피드백, 코드 퀴즈를 제공합니다. 외부 AI의 생성 답변이 아님을 명시합니다.</p></div>
           </article>
           <article class="panel goal-card" id="challenge"><div class="goal-heading"><span class="goal-icon">◎</span><div><span class="step-label">오늘의 미션</span><h3>균형 잡힌 조건 찾기</h3></div></div><p>가공시간을 줄이면서 장비 동력이 <b>5.5 kW</b>를 넘지 않는 조건을 찾아보세요.</p><div class="goal-status"><span>현재 조건 달성도</span><b id="goalPercent">68%</b></div><div class="goal-track"><i id="goalBar"></i></div><button id="challengeButton" class="text-button">미션 기준 보기 <span>→</span></button></article>
           <article class="panel insight-card"><div class="insight-title"><span>↗</span>핵심 개념</div><p>테이블 이송속도 <b>vf</b>는 날당 이송량 <b>fz</b>, 회전수 <b>n</b>, 날 수 <b>z</b>의 곱이에요.</p><div class="formula">vf = fz × n × z</div><button id="formulaButton">개념 노트 열기 <span>↗</span></button></article>
         </aside>
       </div>
       <section class="learning-hub" id="learningModules">
-        <div class="module-heading"><div><div class="eyebrow"><span class="eyebrow-dot"></span>CONNECTED PRACTICE</div><h2>가공 학습 모듈</h2><p>현재 NC 코드와 공구·소재 조건을 바탕으로 실험, 해석, 셋업, 진단, 공정 비교를 연습합니다.</p></div><span class="module-link-state" id="moduleLinkState">NC 코드 대기</span></div>
+        <div class="module-heading"><div><div class="eyebrow"><span class="eyebrow-dot"></span>CONNECTED PRACTICE</div><h2>가공 학습 모듈</h2><p>현재 NC 코드와 공구·소재 조건을 바탕으로 실험, 해석, 셋업, 진단, 공정 비교를 연습합니다.</p></div><div class="module-heading-status"><span class="module-progress" id="moduleProgress">완료 0 / 5</span><span class="module-link-state" id="moduleLinkState">NC 코드 대기</span></div></div>
         <div class="module-grid">
           <article class="module-card condition-compare"><div class="module-kicker">01 · 조건 영향 실험</div><h3>이송 조건 바꿔보기</h3><p>현재 NC의 F값 또는 수동 조건을 기준으로 이송 변화의 시간·표면 품질 경향을 비교합니다.</p><div class="module-controls"><label>이송 배율 <select id="feedFactor"><option value="0.7">0.7배</option><option value="1" selected>현재</option><option value="1.3">1.3배</option><option value="1.6">1.6배</option></select></label><button id="compareFeed" class="module-button">결과 비교</button></div><div id="conditionCompareResult" class="module-result" aria-live="polite">현재 조건을 읽으면 비교 결과가 표시됩니다.</div><small class="model-note">모델 가정: 동일 공구 경로·절삭 길이에서 시간은 F에 반비례. 표면 품질은 이송만 반영한 교육용 경향 지표이며 실제 Ra 예측값이 아닙니다.</small></article>
           <article class="module-card code-lesson"><div class="module-kicker">02 · NC 코드 읽기 훈련</div><h3>코드와 동작 연결</h3><p>편집기의 현재 프로그램을 줄별로 읽습니다. 분석된 현재 블록과 위험 알림을 함께 보여줍니다.</p><div class="module-toolbar"><button id="decodeProgram" class="module-button">코드 줄 해석</button><button id="codeQuiz" class="module-button secondary">한 줄 퀴즈</button></div><div id="codeLessonResult" class="module-result">코드 해석을 누르면 지원 코드의 의미를 표시합니다.</div><div id="codeQuizResult" class="quiz-result" hidden></div></article>
@@ -146,6 +159,7 @@
           <article class="module-card process-lesson"><div class="module-kicker">05 · 공정 계획 비교</div><h3>가공 순서 선택</h3><p>동일 형상을 황삭·정삭으로 나눌지, 단일 패스로 가공할지 학습용 모델로 비교합니다.</p><div class="module-toolbar"><label>현재 제거 체적 (cm³) <input id="planVolume" type="number" min="1" step="1" value="12"></label><button id="comparePlans" class="module-button">공정 비교</button></div><div id="processCompareResult" class="module-result">NC 실행 결과가 있으면 실제 제거 체적을 우선 사용합니다.</div><small class="model-note">시간은 NC 경로와 수동 조건을 단순화한 추정치이며 공구교환·가감속·비절삭시간은 시나리오 가정으로 계산합니다.</small></article>
           <article class="module-card learning-status"><div class="module-kicker">학습 피드백</div><h3>이번 프로그램 검토</h3><div id="programLearningSummary" class="module-result">NC 코드를 분석하면 공구, 이송, 시간, 경고를 이곳에 요약합니다.</div><small class="model-note">현재 코치는 명시된 식과 규칙으로 피드백하는 로컬 학습 코치입니다. AI 생성 판정이나 실제 기계 검증으로 오인하지 않도록 판단 근거를 표시합니다.</small></article>
         </div>
+        <article class="module-reflection" aria-live="polite"><div class="reflection-heading"><span class="module-kicker">학습 확인</span><b id="reflectionProgress">아직 완료한 활동이 없습니다.</b></div><div class="reflection-content"><div><strong id="reflectionLearned">활동을 마치면 핵심 학습 내용이 여기에 표시됩니다.</strong><p id="reflectionQuestion">각 모듈을 실행하고 짧은 확인 문제에 답해 보세요.</p></div><label for="reflectionAnswer">답 선택<select id="reflectionAnswer" disabled><option value="">활동 후 선택하세요</option></select></label><button type="button" class="module-button" id="checkReflection" disabled>정답 확인</button></div><div id="reflectionFeedback" class="reflection-feedback" role="status"></div></article>
       </section>
       <footer class="page-footer"><span>CHIPMATE LEARNING LAB <b>·</b> 가상 학습용 추정 모델</span><span>계산값은 학습용 근사치이며 실제 가공 전 공구사 권장조건과 장비 사양을 확인하세요.</span></footer>
     </main>
@@ -153,7 +167,7 @@
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
   <dialog id="infoDialog"><form method="dialog"><button class="dialog-close" aria-label="닫기">×</button><div class="dialog-kicker">CHIPMATE LEARNING NOTE</div><h2 id="dialogTitle">오늘의 학습 목표</h2><div id="dialogBody"></div><button class="dialog-ok">확인</button></form></dialog>
   <script src="app.js"></script>
-  <script src="nc-sim.js"></script>
-  <script src="learning.js"></script>
+  <script src="nc-sim.js?v=20261031a"></script>
+  <script src="learning.js?v=20261031a"></script>
 </body>
 </html>

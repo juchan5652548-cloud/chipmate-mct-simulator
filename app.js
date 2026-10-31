@@ -39,7 +39,7 @@ function coachText(s) {
   const feedRatio = s.fz / s.material.optimalFz;
   const notes = [];
   if (rpmOver) notes.push(`회전수 ${format(s.rpm)} rpm이 장비 한계 8,000 rpm을 넘어요. 공구 지름이나 절삭속도를 낮춰 보세요.`);
-  if (powerHigh) notes.push(`예상 주축 동력 ${format(s.power, 2)} kW가 장비 한계 5.5 kW를 넘어요. 절입량 또는 이송량을 줄이는 것이 안전합니다.`);
+  if (powerHigh) notes.push(`예상 주축 동력 ${format(s.power, 2)} kW가 설정한 참고 한계 5.5 kW를 넘어요. 절입량 또는 이송량을 낮춰 조건을 다시 검토하세요. 이 계산은 실제 장비 안전 판정이 아닙니다.`);
   if (!rpmOver && !powerHigh && (speedRatio > 1.3 || feedRatio > 1.5)) notes.push(`현재 조건은 ${s.material.name}의 학습용 기준보다 공격적이에요. 공구 마모와 진동 위험을 생각해 절삭속도 또는 날당 이송량을 조금 낮춰 비교해 보세요.`);
   if (!rpmOver && !powerHigh && speedRatio < .65) notes.push(`절삭속도가 학습용 기준보다 낮아요. 생산성이 떨어질 수 있지만, 소재와 공구 조건을 확인하며 조금씩 올려 비교할 수 있어요.`);
   if (!rpmOver && !powerHigh && feedRatio < .6) notes.push(`날당 이송량이 낮은 편이에요. 이송을 무조건 낮추기보다 공구사 권장조건과 최소 칩두께를 확인해 보세요.`);
@@ -146,14 +146,14 @@ window.addEventListener('mct:nc-link', (event) => {
   $('ncLinkedDetail').textContent = `${toolText} · S${format(rpm)} rpm · F${format(programmedFeed)} mm/min · Z깊이 ${format(cutDepth, 2)} mm · 제거 ${format(Number(d.removedVolume) || 0, 3)} cm³ · 누적 ${format(Number(d.elapsedSeconds) || 0, 1)}초 · ae는 공구경로 형상으로 계산${d.phase === 'ready' ? ' · 실행 전 계획 조건' : ''}`;
   $('previewSource').innerHTML = `<i></i> ${d.phase === 'ready' ? 'NC 코드 조건' : 'NC 시뮬레이션 결과'}`;
   if (d.phase === 'ready') {
-    $('coachMessage').innerHTML = `<div class="message-label">NC 코드 연동</div><p>이 미리보기는 NC 프로그램의 <b>S${format(rpm)} rpm · F${format(programmedFeed)} mm/min · T${d.toolNo ?? '—'}</b> 조건을 읽었습니다. <b>NC 코드 실행</b>을 누르면 실제 공구 경로의 제거 체적과 재료 제거율이 갱신됩니다.</p>`;
+    $('coachMessage').innerHTML = `<div class="message-label">NC 코드 연동 · 실행 전 계획값</div><p>현재 NC 프로그램의 <b>S${format(rpm)} rpm · F${format(programmedFeed)} mm/min · T${d.toolNo ?? '—'}</b>를 연결했습니다. <b>NC 코드 실행</b>을 누르면 간이 소재 모델의 제거량과 시간 추정이 갱신됩니다.</p>`;
   } else if (d.phase === 'complete') {
-    const caution = d.warnings?.length ? ` 검토 경고가 ${d.warnings.length}건 있어 NC 화면의 경고를 확인하세요.` : ' NC 화면에서 블록별 충돌 검사 결과를 확인하세요.';
-    $('coachMessage').innerHTML = `<div class="message-label">NC 가공 결과</div><p>실행한 경로의 소재 제거량은 <b>${format(Number(d.removedVolume) || 0, 3)} cm³</b>, 절삭 이송 중 평균 재료 제거율은 <b>${format(mrr, 2)} cm³/min</b>입니다.${caution}</p>`;
+    const caution = d.warnings?.length ? ` 간이 모델에서 위험 후보/검토 항목 ${d.warnings.length}건을 찾았습니다. NC 화면에서 항목을 확인하세요.` : ' 간이 모델에서 등록된 위험 후보는 없지만 실제 기계 안전을 보증하지는 않습니다.';
+    $('coachMessage').innerHTML = `<div class="message-label">NC 간이 모델 결과</div><p>실행한 경로의 소재 제거량은 <b>${format(Number(d.removedVolume) || 0, 3)} cm³</b>, 절삭 이송 중 평균 재료 제거율은 <b>${format(mrr, 2)} cm³/min</b>입니다.${caution}</p>`;
   } else if (d.phase === 'error') {
     $('coachMessage').innerHTML = `<div class="message-label">NC 검증 중단</div><p>해석할 수 없는 블록에서 시뮬레이션을 멈췄습니다. NC 시뮬레이터의 오류와 지원하지 않는 코드를 먼저 수정하세요.</p>`;
   } else if (d.phase === 'running' || d.phase === 'paused') {
-    $('coachMessage').innerHTML = `<div class="message-label">NC 블록 실행 · N${d.lineNo || '—'}</div><p><b>S${format(rpm)} rpm · F${format(programmedFeed)} mm/min</b> 조건을 읽었습니다. 지금까지 소재 ${format(Number(d.removedVolume) || 0, 3)} cm³를 제거했고, 시뮬레이터가 공구·바이스 간섭을 확인하고 있습니다.</p>`;
+    $('coachMessage').innerHTML = `<div class="message-label">NC 블록 실행 · N${d.lineNo || '—'}</div><p><b>S${format(rpm)} rpm · F${format(programmedFeed)} mm/min</b> 조건을 읽었습니다. 지금까지 소재 ${format(Number(d.removedVolume) || 0, 3)} cm³를 제거했습니다. 간이 소재·공구·바이스 모델에서 발견되는 위험 후보를 확인하세요.</p>`;
   }
   const scene = $('machineScene');
   scene.classList.toggle('running', d.phase === 'running');
